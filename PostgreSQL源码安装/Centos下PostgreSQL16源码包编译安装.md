@@ -16,7 +16,7 @@ Firewalld关闭、selinux关闭
 
 这里下载包，并上传到服务器
 
-![image-20240621212253465](image/image-20240621212253465.png)
+![image-20240624231007392](image/image-20240624231007392.png)
 
 #### 三、安装依赖包
 
@@ -26,41 +26,7 @@ Firewalld关闭、selinux关闭
 yum install -y perl-ExtUtils-Embed readline-devel zlib-devel pam-devel libxml2-devel libxslt-devel openldap-devel python-devel gcc-c++ openssl-devel cmake
 ```
 
-如果你的系统是Ubuntu，你可以使用`apt-get`来安装与这些软件包相对应的包。以下是相应的命令：
-
-```
-sudo apt-get update
-sudo apt-get install -y \
-  libperl-dev \
-  libreadline-dev \
-  zlib1g-dev \
-  libpam0g-dev \
-  libxml2-dev \
-  libxslt1-dev \
-  libldap2-dev \
-  python-dev \
-  g++ \
-  libssl-dev \
-  cmake
-```
-
-这个命令将会安装与`yum`命令中相对应的所有软件包。以下是各软件包的对照：
-
-- `perl-ExtUtils-Embed` -> `libperl-dev`
-- `readline-devel` -> `libreadline-dev`
-- `zlib-devel` -> `zlib1g-dev`
-- `pam-devel` -> `libpam0g-dev`
-- `libxml2-devel` -> `libxml2-dev`
-- `libxslt-devel` -> `libxslt1-dev`
-- `openldap-devel` -> `libldap2-dev`
-- `python-devel` -> `python-dev`
-- `gcc-c++` -> `g++`
-- `openssl-devel` -> `libssl-dev`
-- `cmake` -> `cmake`
-
-确保运行这些命令时使用`sudo`，以获得必要的权限来安装软件包。
-
-![image-20240621215745937](image/image-20240621215745937.png)
+![image-20240624231124516](image/image-20240624231124516.png)
 
 #### 四、安装postgreSQL
 
@@ -79,6 +45,8 @@ postgresql-16.0  postgresql-16.0.tar.gz
 tar -zxvf postgresql-16.0.tar.gz
 ```
 
+![image-20240624231612348](image/image-20240624231612348.png)
+
 ```
 3）、进入加压后的文件夹
 [root@bogon ~]# cd pgsql/postgresql-16.0
@@ -87,13 +55,34 @@ aclocal.m4  config.log     configure     contrib    doc          GNUmakefile.in 
 config      config.status  configure.ac  COPYRIGHT  GNUmakefile  HISTORY         Makefile  meson_options.txt  src
 ```
 
+![image-20240624231642336](image/image-20240624231642336.png)
+
 ```
 4、编译postgresql源码
 ./configure --prefix=/pgsql/postgresql --without-icu
 ```
 
-**注意：笔者在这里碰到编译报错，由于版本比较新也没有查到相关处理方法，索性就按照提示操作，禁用icu模块支持。–without-icu**  
-![在这里插入图片描述](image/9eceb744bd074c37a81905de738e9a35.png)
+#### 实操
+
+编译源码，我这里要考虑到后面要gdb调试，可能会报错，加上without icu
+
+![image-20240624232032003](image/image-20240624232032003.png)
+
+```
+./configure --prefix=/pgsql/postgresql --enable-depend --enable-debug --enable-cassert CFLAGS=-O0 --with-libedit-preferred --with-perl --with-python --with-uuid=e2fs --with-systemd --enable-dtrace --without-icu
+```
+
+uuid也不要，systemd也不要，python也不要
+
+```
+./configure --prefix=/pgsql/postgresql --enable-depend --enable-debug --enable-cassert CFLAGS=-O0 --with-libedit-preferred --with-perl --enable-dtrace --without-icu
+```
+
+成功
+
+![image-20240624232314897](image/image-20240624232314897.png)
+
+
 
 | 选项              | 描述                                         |
 | ----------------- | -------------------------------------------- |
@@ -107,12 +96,20 @@ config      config.status  configure.ac  COPYRIGHT  GNUmakefile  HISTORY        
 
 ```
 5、编译安装
-root@bogon postgresql-16.0]# make &amp;&amp; make install
+root@bogon postgresql-16.0]# make && make install
 编译安装结束没有报错证明安装成功；至此已完成postgresql的安装。进入/pgsql/postgresql目录可以看到安装后的postgresql文件。
 [root@bogon postgresql-16.0]# cd /pgsql/postgresql/
 [root@bogon postgresql]# ls
 bin  include  lib  share
 ```
+
+#### 实操
+
+make && make install
+
+![image-20240624232614738](image/image-20240624232614738.png)
+
+![image-20240624232703691](image/image-20240624232703691.png)
 
 #### 五、创建用户组postgre并创建用户postgre
 
@@ -122,6 +119,10 @@ bin  include  lib  share
 [root@bogon postgresql]# id postgres
 uid=1001(postgres) gid=1001(postgres) groups=1001(postgres)
 ```
+
+#### 实操
+
+![image-20240624233720322](image/image-20240624233720322.png)
 
 #### 六、创建postgresql数据库的数据主目录并修改文件所有者
 
@@ -141,6 +142,10 @@ drwxr-xr-x 6 root     root     4096 Sep 19 16:20 include
 drwxr-xr-x 4 root     root     4096 Sep 19 16:20 lib
 drwxr-xr-x 6 root     root     4096 Sep 19 16:20 share
 ```
+
+#### 实操
+
+![image-20240624233856142](image/image-20240624233856142.png)
 
 #### 七、配置环境变量
 
@@ -175,6 +180,16 @@ PATH=$PATH:$HOME/bin:$PGHOME/bin
 
 编辑修改.bash\_profile文件然后保存。执行以下命令，使环境变量生效  
 \[root@bogon postgres\]# source .bash\_profile
+
+#### 实操
+
+![image-20240624234002753](image/image-20240624234002753.png)
+
+修改环境变量
+
+![image-20240624234304677](image/image-20240624234304677.png)
+
+![image-20240624234335932](image/image-20240624234335932.png)
 
 #### 八、切换到postgre用户，并使用initdb初始化数据库
 
@@ -214,6 +229,12 @@ base    pg_commit_ts  pg_hba.conf    pg_logical    pg_notify    pg_serial     pg
 global  pg_dynshmem   pg_ident.conf  pg_multixact  pg_replslot  pg_snapshots  pg_stat_tmp  pg_tblspc    PG_VERSION   pg_xact  postgresql.conf
 ```
 
+#### 实操
+
+![image-20240624234412164](image/image-20240624234412164.png)
+
+![image-20240624234757376](image/image-20240624234757376.png)
+
 #### 九、配置服务
 
 ```
@@ -241,6 +262,22 @@ pg_hba.conf文件新增内容如下：
 host    all      all             0.0.0.0/0               trust
 
 ```
+
+#### 实操
+
+```
+vi /pgsql/postgresql/data/postgresql.conf 
+```
+
+![image-20240624235203046](image/image-20240624235203046.png)
+
+```
+vim pg_hba.conf
+```
+
+![image-20240624235256094](image/image-20240624235256094.png)
+
+
 
 #### 十、设置postgresql开机自启动
 
@@ -279,6 +316,19 @@ Starting PostgreSQL: ok
 1 S postgres  17659  17653  0  80   0 - 68969 ep_pol 16:35 ?        00:00:00 postgres: logical replication launcher 
 0 S root      17663  17574  0  80   0 - 28202 pipe_w 16:36 pts/1    00:00:00 grep --color=auto postgres
 ```
+
+#### 实操
+
+![image-20240624235446427](image/image-20240624235446427.png)
+
+![image-20240624235504743](image/image-20240624235504743.png)
+
+```
+chmod a+x linux
+cp linux /etc/init.d/postgresql
+```
+
+
 
 #### 十一、开始测试
 

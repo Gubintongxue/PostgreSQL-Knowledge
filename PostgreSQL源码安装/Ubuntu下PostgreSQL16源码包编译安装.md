@@ -487,6 +487,10 @@ pg\_hba.conf 配置对数据库的访问权限。
 
 ```
 
+```
+其中，参数“listen_addresses”表示监听的IP地址，默认是在localhost处监听，也就是127.0.0.1的IP地址上监听，只接受来自本机的localhost的连接请求，这会让远程的主机无法登陆这台数据库，如果想从其他的机器上登陆这台数据库，需要把监听地址改为实际网络的地址，一种简单的方法是，将行开头的#号去掉，把这个地址改为*，表示在本地的所有地址上监听。
+```
+
 将listen\_addresses和port前的注释去掉，并修改listen\_addresses的值为\*
 
 ```
@@ -510,10 +514,25 @@ max_connections = 100                   # (change requires restart)
 在[IPv4](https://so.csdn.net/so/search?q=IPv4&spm=1001.2101.3001.7020)中添加一条语句
 
 ```
+vim pg_hba.conf
 # IPv4 local connections:
 host    all             all             0.0.0.0/0               trust
 host    all             all             127.0.0.1/32            trust
 ```
+
+### 实操
+
+![image-20240623212242657](image/image-20240623212242657.png)
+
+去掉listen和port注释,并将地址修改为*
+
+![image-20240623212400656](image/image-20240623212400656.png)
+
+vim pg_hba.conf
+
+添加一行，这样局域网的人才能访问，红色为新添加内容。
+
+![image-20240623212725830](image/image-20240623212725830.png)
 
 ### 九、设置PostgreSQL开机自启动
 
@@ -576,6 +595,66 @@ Starting PostgreSQL: ok
 
 ```
 
+#### 实操
+
+![image-20240623213018223](image/image-20240623213018223.png)
+
+![image-20240623213035041](image/image-20240623213035041.png)
+
+```
+[root@bogon start-scripts]# pwd
+/root/pgsql/postgresql-16.0/contrib/start-scripts
+[root@bogon start-scripts]# ls
+freebsd  linux  macos
+1）	切换为root用户，修改Linux文件属性，添加X属性
+[root@bogon start-scripts]# chmod a+x linux
+2）	复制Linux文件到/etc/init.d目录下，更名为postgresql
+[root@bogon start-scripts]# cp linux /etc/init.d/postgresql
+3）	修改/etc/init.d/postgresql文件的两个变量
+Prefix设置为postgresql的安装路径：/pgsql/postgresql
+PGDATA设置为postgresql的数据目录路径："/pgsql/postgresql/data"
+4）	设置postgresql服务开启自启动
+[root@bogon start-scripts]# chkconfig --add postgresql
+查看开机自启服务设置成功
+[root@bogon start-scripts]# chkconfig 
+postgresql     	0:off	1:off	2:on	3:on	4:on	5:on	6:off
+5)执行service postgresql start，启动postgreSQL服务
+[root@bogon start-scripts]# service postgresql start
+Starting PostgreSQL: ok
+查看postgresql服务监听
+[root@bogon start-scripts]# ps -elf |grep postgres
+4 S root      17527   7286  0  80   0 - 47969 do_wai 16:26 pts/0    00:00:00 su - postgres
+4 S postgres  17528  17527  0  80   0 - 28886 n_tty_ 16:26 pts/0    00:00:00 -bash
+0 S postgres  17653      1  0  80   0 - 68572 ep_pol 16:35 ?        00:00:00 /pgsql/postgresql/bin/postgres -D /pgsql/postgresql/data
+1 S postgres  17654  17653  0  80   0 - 68607 ep_pol 16:35 ?        00:00:00 postgres: checkpointer 
+1 S postgres  17655  17653  0  80   0 - 68605 ep_pol 16:35 ?        00:00:00 postgres: background writer 
+1 S postgres  17657  17653  0  80   0 - 68605 ep_pol 16:35 ?        00:00:00 postgres: walwriter 
+1 S postgres  17658  17653  0  80   0 - 68974 ep_pol 16:35 ?        00:00:00 postgres: autovacuum launcher 
+1 S postgres  17659  17653  0  80   0 - 68969 ep_pol 16:35 ?        00:00:00 postgres: logical replication launcher 
+0 S root      17663  17574  0  80   0 - 28202 pipe_w 16:36 pts/1    00:00:00 grep --color=auto postgres
+
+```
+
+![image-20240623213544709](image/image-20240623213544709.png)
+
+![image-20240623213532470](image/image-20240623213532470.png)
+
+设置开机自启动，ubuntu下是
+
+```
+sudo systemctl enable postgresql
+```
+
+还是不行，补充资料
+
+![image-20240623214317902](image/image-20240623214317902.png)
+
+还是不行，参考
+
+[一个解决linux系统下没有chkconfig命令导致的command not found: chkconfig问题_chkconfig: command not found-CSDN博客](https://blog.csdn.net/wildwolf_001/article/details/115250102?ops_request_misc=%7B%22request%5Fid%22%3A%22171915015916800185859996%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&request_id=171915015916800185859996&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~baidu_landing_v2~default-3-115250102-null-null.142^v100^pc_search_result_base5&utm_term=chkconfig%3A command not found&spm=1018.2226.3001.4187)
+
+
+
 ### 十、开始测试
 
 默认的用户是postgres，密码和linux系统中所设的postgres用户的密码一样
@@ -590,3 +669,7 @@ Type "help" for help.
 postgres=# 
 
 ```
+
+
+
+### 总的来说安装失败了，无法启动pgsql，后面切换系统为centos
