@@ -294,6 +294,7 @@ freebsd  linux  macos
 2）复制Linux文件到/etc/init.d目录下，更名为postgresql
 [root@bogon start-scripts]# cp linux /etc/init.d/postgresql
 3）修改/etc/init.d/postgresql文件的两个变量
+vi /etc/init.d/postgresql
 Prefix设置为postgresql的安装路径：/pgsql/postgresql
 PGDATA设置为postgresql的数据目录路径："/pgsql/postgresql/data"
 4）设置postgresql服务开启自启动
@@ -328,7 +329,21 @@ chmod a+x linux
 cp linux /etc/init.d/postgresql
 ```
 
+![image-20240624235831345](image/image-20240624235831345.png)
 
+修改/etc/init.d/postgresql文件的两个变量
+
+![image-20240625000001289](image/image-20240625000001289.png)
+
+![image-20240625000118570](image/image-20240625000118570.png)
+
+设置和查看postgresql服务开启自启动
+
+![image-20240625000247540](image/image-20240625000247540.png)
+
+执行service postgresql start，启动postgreSQL服务，查看postgresql服务监听
+
+![image-20240625000415802](image/image-20240625000415802.png)
 
 #### 十一、开始测试
 
@@ -352,6 +367,16 @@ CREATE DATABASE
 postgres=# \q
 ```
 
+#### 实操
+
+![image-20240625000528545](image/image-20240625000528545.png)
+
+![image-20240625000621656](image/image-20240625000621656.png)
+
+![image-20240625000633986](image/image-20240625000633986.png)
+
+
+
 1.  重新登陆数据库
 2.  输入密码
 3.  显示数据库
@@ -366,3 +391,15 @@ pg=# \l
 
 ![在这里插入图片描述](image/997dcfd01e4b4ebca99369d564b504c7.png)  
 至此数据库安装成功。
+
+#### 实操
+
+```
+[postgres@hcss-ecs-e208 ~]$ psql -U pg -d pg
+pg=# \l
+pg=# \q
+```
+
+![image-20240625000741890](image/image-20240625000741890.png)
+
+安装完成，后面开始我们的gdb调试教程。
