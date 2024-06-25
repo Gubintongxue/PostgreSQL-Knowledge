@@ -94,130 +94,69 @@ handle SIGUSR2 noprint nostop
 set pagination off
 ```
 
-SQL
-
-复制
+- 查询后台进程ID
 
 
+```
+select pg_backend_pid();
+```
 
-•
-
-查询后台进程ID
-
-
-
-SQL
-
-复制
+- gdb调试
 
 
-
-
-
-Plain Text
-
-复制
-
+```
 gdb attach pid -tui
+```
 
 
 
-六、注意
+## 六、注意
 
-•
-
-config出错的时候，有可能需要加上\--without-icu
+- config出错的时候，有可能需要加上\--without-icu
 
 
+```
+ ./configure  --enable-debug  --enable-cassert --prefix=/data/yaojun/pg/pg_install CFLAGS=-O0 --without-icu
+```
 
-C++
-
-复制
-
-./configure --enable-debug --enable-cassert --prefix=/data/yaojun/pg/pg\_install CFLAGS=-O0 --without-icu
-
+- beta\_16
 
 
-•
+```
+# PG_16_beta
+git checkout -b  REL_16_BETA1
+./configure  --enable-debug  --enable-cassert --prefix=/Users/yaojun/MyInstall/pg_install CFLAGS=-O0 --without-icu
+```
 
-beta\_16
-
-
-
-SQL
-
-复制
-
-\# PG\_16\_beta
-
-git checkout \-b REL\_16\_BETA1
-
-./configure \--enable-debug --enable-cassert \--prefix=/Users/yaojun/MyInstall/pg\_install CFLAGS=-O0 --without-icu
+- 其他
 
 
+```
+pg_ctl -D dest -l logfile start
+```
 
-•
-
-其他
-
-
-
-C++
-
-复制
-
-pg\_ctl -D dest -l logfile start
+- 环境变量未生效
 
 
-
-•
-
-环境变量未生效
-
-
-
-C++
-
-复制
-
-\# 可能不需要
-
-export LD\_LIBRARY\_PATH=$LD\_LIBRARY\_PATH:/data/pgyaojun/install\_pg/lib
-
+```
+# 可能不需要
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/pgyaojun/install_pg/lib
 export PATH
+```
 
-
-
-•
-
-使用默认端口
-
+- 使用默认端口
 
 
 PG不支持-r参数
 
-
-
-
-
-C++
-
-复制
-
-\# 使用默认端口
-
+```
+# 使用默认端口
 psql -d postgres
+```
+
+- 启动服务器
 
 
-
-•
-
-启动服务器
-
-
-
-C++
-
-复制
-
-pg\_ctl start -D pg\_data
+```
+pg_ctl start -D pg_data
+```
