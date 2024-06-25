@@ -403,3 +403,5 @@ pg=# \q
 ![image-20240625000741890](image/image-20240625000741890.png)
 
 安装完成，后面开始我们的gdb调试教程。
+
+感谢 [PostgreSQL16源码包编译安装_postgresql16安装-CSDN博客](https://blog.csdn.net/wang_xiangjun/article/details/133122868?ops_request_misc=&request_id=&biz_id=102&utm_term=postgresql源码包安装&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-4-133122868.142^v100^pc_search_result_base5&spm=1018.2226.3001.4187)
